@@ -1,0 +1,8 @@
+#!/bin/bash
+
+docker run \
+    --volume /Users/dv/Documents/abb/address-search-add-on/:/app/ \
+    --env NODE_ENV="development" \
+    -p 9300:80 \
+    address-search-add-on:latest
+    
