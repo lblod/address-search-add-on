@@ -1,0 +1,33 @@
+{
+    "LocationResult": [
+        {
+            "Municipality": "Blankenberge",
+            "Zipcode": "8370",
+            "Thoroughfarename": "Fabiolapark",
+            "Housenumber": "23",
+            "ID": 1876524,
+            "FormattedAddress": "Fabiolapark 23, 8370 Blankenberge",
+            "Location": {
+                "Lat_WGS84": 51.304648239977219,
+                "Lon_WGS84": 3.1449787658334762,
+                "X_Lambert72": 64657.79,
+                "Y_Lambert72": 222348.34
+            },
+            "LocationType": "crab_huisnummer_manueleAanduidingVanGebouw",
+            "BoundingBox": {
+                "LowerLeft": {
+                    "Lat_WGS84": 51.304648239977219,
+                    "Lon_WGS84": 3.1449787658334762,
+                    "X_Lambert72": 64657.79,
+                    "Y_Lambert72": 222348.34
+                },
+                "UpperRight": {
+                    "Lat_WGS84": 51.304648239977219,
+                    "Lon_WGS84": 3.1449787658334762,
+                    "X_Lambert72": 64657.79,
+                    "Y_Lambert72": 222348.34
+                }
+            }
+        }
+    ]
+}
