@@ -1,6 +1,7 @@
 import config from '../config/config';
 import { Address, LocationInFlanders, addressMatchResultSchema } from '../types';
 import postalCodeToProvince from '../postcode-province/postcode-province';
+import { encodeValuesURI } from '../util/util';
 
 export default async function getAllAddresses(
   location: LocationInFlanders
@@ -23,20 +24,7 @@ export default async function getAllAddresses(
   return addresses;
 }
 
-type UrlEncodedLocation = LocationInFlanders;
-
-function encodeURILocation(location: LocationInFlanders): UrlEncodedLocation {
-  const keys = Object.keys(location) as (keyof LocationInFlanders)[];
-  return keys.reduce<UrlEncodedLocation>(
-    (acc, current) => {
-      acc[current] = encodeURIComponent(location[current]);
-      return acc;
-    },
-    { ...location }
-  );
-}
-
 function getAllAddressesSearchUrl(location: LocationInFlanders) {
-  const uriEncodedLocation = encodeURILocation(location);
+  const uriEncodedLocation = encodeValuesURI(location);
   return `${config.BASISREGISTER_ADDRESSES_SEARCH_URL}?gemeentenaam=${uriEncodedLocation.municipality}&postcode=${uriEncodedLocation.postalCode}&straatnaam=${uriEncodedLocation.street}&huisnummer=${uriEncodedLocation.housenumber}`;
 }
