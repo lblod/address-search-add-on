@@ -1,50 +1,9 @@
 import { z } from 'zod';
-
-const provinces = [
-  'West-Vlaanderen' ,
-  'Oost-Vlaanderen' ,
-  'Antwerpen' ,
-  'Vlaams-Brabant',
-  'Limburg'
-] as const;
-
-const europeanCountries = [
-  "België",
-  "Bulgarije",
-  "Cyprus",
-  "Denemarken",
-  "Duitsland",
-  "Estland",
-  "Finland",
-  "Frankrijk",
-  "Griekenland",
-  "Hongarije",
-  "Ierland",
-  "Italië",
-  "Kroatië",
-  "Letland",
-  "Litouwen",
-  "Luxemburg",
-  "Malta",
-  "Nederland",
-  "Oostenrijk",
-  "Polen",
-  "Portugal",
-  "Roemenië",
-  "Slovenië",
-  "Slowakije",
-  "Spanje",
-  "Tsjechië",
-  "Zweden",
-] as const;
-
-export type Province = typeof provinces[number];
-export type Country = typeof europeanCountries[number];
-
-const postalCodeSchema = z.string().regex(/^[0-9]{4}$/);
+import { postalCodeSchema } from './types/api-schemas';
+import { Province, provinces } from './types/constants';
 
 /**
- * Address data structure which contains all the information
+ * Address data structure which contains all the information associated with a correctly formatted address.
  */
 export type Address = {
     country: string;
@@ -55,6 +14,8 @@ export type Address = {
     houseNumber: string;
     boxNumber: string | null;
 }
+
+// Schema's for validation of query objects
 
 const searchQuerySchema = z.object({
   query: z.string(),
@@ -75,107 +36,27 @@ const provinceQuerySchema = z.object({
   municipality: z.string().optional(),
 });
 
-/**
- * Data structure modeling the resut of the fuzzy address search.
- * This can be sent back to the microservice when a user selects one of these adresses in the search box
- * 
- */
-const locationInFlandersSchema = z.object({
-  municipality: z.string(),
-  street: z.string(),
-  housenumber: z.string(),
-  postalCode: z.string(),
-});
 
-/**
- * Data structure modeling the parts of the JSON LD output we are interested in when we
- * get back address match results
- */
-const addressMatchResultSchema = z.object({
-  adresMatches: z.array(z.object({
-    gemeente: z.object({
-      gemeentenaam: z.object({
-        geografischeNaam: z.object({
-          spelling: z.string()
-        })
-      })
-    }),
-    postinfo: z.object({
-      objectId: z.string()
-    }),
-    straatnaam: z.object({
-      straatnaam: z.object({
-        geografischeNaam: z.object({
-          spelling: z.string()
-        })
-      })
-    }),
-    huisnummer: z.string(),
-    busnummer: z.string().optional(),
-  }))
-});
-
-const municipalitySearchResultSchema = z.object({
-  gemeenten: z.array(z.object({
-    gemeentenaam: z.object({geografischeNaam:z.object({spelling:z.string()})}),
-    detail: z.string(),
-  }))
-})
-
-const postalCodeGetResultSchema = z.object({
-  gemeente: z.object({
-    gemeentenaam: z.object({
-      geografischeNaam: z.object({
-        spelling: z.string(),
-      }),
-    }),
-  }),
-  postnamen: z.array(z.object({
-    geografischeNaam: z.object({
-      spelling: z.string(),
-    }),
-  }))
-});
-
-const municipalityGetPostInfoResultSchema = z.object({
-  postInfoObjecten: z.array(z.object({
-    identificator: z.object({
-      objectId:z.string(),
-    }),
-    postnamen: z.array(z.object({
-      geografischeNaam: z.object({
-        spelling: z.string(),
-      }),
-    }))
-  }))
-})
-
-export type MunicipalitySuggestion = {
-  name: string;
-  province: Province;
+export type PostalNameSuggestion = {
+  postalName: string;
   postalCode: string;
-  alternateNames: string[] | undefined,
+  province: Province;
+  municipalityName?: string,
 }
 
 export type PostalCodeSuggestion = {
   postalCode: string,
-  alternateNames: string[],
+  postalNames: string[], // At least one
 }
 
+export type ProvinceSuggestion = string; // For now
+
 export { 
-  provinces,
-  europeanCountries,
-  locationInFlandersSchema, 
-  addressMatchResultSchema, 
-  searchQuerySchema, 
-  municipalitySearchResultSchema,
-  postalCodeSchema,
-  postalCodeQuerySchema,
+  searchQuerySchema,
   municipalitiesQuerySchema,
+  postalCodeQuerySchema,
   provinceQuerySchema,
-  postalCodeGetResultSchema,
-  municipalityGetPostInfoResultSchema,
 };
 
-export type LocationInFlanders = z.infer<typeof locationInFlandersSchema>;
-export type AddressMatchResult = z.infer<typeof addressMatchResultSchema>;
+
+

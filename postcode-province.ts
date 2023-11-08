@@ -1,4 +1,4 @@
-import { Province } from '../types';
+import { Province } from './types';
 
 const postalCodeRegex = /^[0-9]{4}$/;
 

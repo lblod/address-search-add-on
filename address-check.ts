@@ -1,9 +1,9 @@
-import config from '../config/config';
-import { Address, LocationInFlanders, addressMatchResultSchema } from '../types';
-import postalCodeToProvince from '../postcode-province/postcode-province';
-import { encodeValuesURI } from '../util/util';
+import config from './config';
+import { Address, LocationInFlanders, addressMatchResultSchema } from './types';
+import postalCodeToProvince from './postcode-province';
+import { encodeValuesURI } from './util/util';
 
-export default async function getAllAddresses(
+export default async function getAllVerifiedAddresses(
   location: LocationInFlanders
 ): Promise<Address[]> {
   console.log(`Request:${getAllAddressesSearchUrl(location)}`);
