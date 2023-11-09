@@ -1,6 +1,7 @@
 import { z } from 'zod';
-import config from '../config/config';
-import { LocationInFlanders } from '../types';
+import config from './config';
+import { ApiError } from './types';
+import prettyError from './util/errors';
 
 const locationResultSchema = z.object({
     Municipality: z.string(),
@@ -11,12 +12,24 @@ const locationResultSchema = z.object({
 });
 
 type LocationResult = z.infer<typeof locationResultSchema>;
+export type LocationInFlanders = {
+    municipality: string;
+    street: string;
+    housenumber: string;
+    postalCode: string;
+}
 
 const validResponseSchema = z.array(locationResultSchema);
 async function getLocations(fuzzyQuery:string): Promise<LocationResult[]> {
     const response = await fetch(fuzzySearchUrl(fuzzyQuery));
-    const locationResult = validResponseSchema.parse((await response.json()).LocationResult);
-    return locationResult;
+    if (response.status !== 200) {
+        throw new ApiError(response.status,await response.text());
+    }
+    const result = validResponseSchema.safeParse((await response.json()).LocationResult);
+    if (!result.success) {
+        throw new ApiError(result.error, `Schema parsing failed\n${prettyError(result.error)}`)
+    }
+    return result.data;
 }
 
 function fuzzySearchUrl(fuzzyQuery:string):string {

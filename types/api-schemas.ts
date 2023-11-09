@@ -83,14 +83,15 @@ const postalCodeMoreInformationSchema = z.object({
 const municipalityGetPostInfoResultSchema = z.object({
     postInfoObjecten: z.array(z.object({
         identificator: z.object({
-        objectId:z.string(),
+            objectId:z.string(),
         }),
         postnamen: z.array(z.object({
-        geografischeNaam: z.object({
-            spelling: z.string(),
-        }),
-        }))
-    }))
+            geografischeNaam: z.object({
+                spelling: z.string(),
+            }),
+        })),
+    })),
+    volgende: z.string().optional(),
     });
 
 export {
@@ -100,6 +101,5 @@ export {
     municipalitySearchResultSchema,
     postalCodeMoreInformationSchema,
     municipalityGetPostInfoResultSchema,
-
 }
 
