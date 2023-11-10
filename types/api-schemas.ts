@@ -68,13 +68,13 @@ const postalCodeMoreInformationSchema = z.object({
             spelling: z.string(),
         }),
         }),
-    }),
+    }).optional(),
     postnamen: z.array(z.object({
         geografischeNaam: z.object({
         spelling: z.string(),
         }),
     }))
-    });
+});
 
 /**
  * We call this endpoint to search for post information associated with a specific postal name

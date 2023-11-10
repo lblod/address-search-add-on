@@ -193,7 +193,7 @@ async function initializeStore() {
         const postalCodeDetailInformation = postalDetails[postalCode];
         if (!postalCodeDetailInformation) throw new Error(`Impossible. Postal code defatil information for ${current} with postal code ${postalCode} not found.`);
         const isMunicipality =  municipalityNames!.has(current);
-        const associatedMunicipality = postalCodeDetailInformation.gemeente.gemeentenaam.geografischeNaam.spelling;
+        const associatedMunicipality = postalCodeDetailInformation.gemeente?.gemeentenaam.geografischeNaam.spelling;
         acc[current] = {
             postalName: current,
             postalCode,

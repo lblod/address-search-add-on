@@ -19,9 +19,10 @@ async function getSpecificPostalInformation(postalCode: string):Promise<z.infer<
     if (response.status !== 200) {
         throw new ApiError(response.status,await response.text());
     }
-    const result = postalCodeMoreInformationSchema.safeParse(await response.json());
+    const body = await response.json();
+    const result = postalCodeMoreInformationSchema.safeParse(body);
     if (!result.success) {
-        throw new ApiError(result.error, `Schema parsing failed\n${prettyError(result.error)}`)
+        throw new ApiError(result.error, `Schema parsing failed\n${prettyError(result.error)}\nBody was:\n${JSON.stringify(body,undefined,3)}`)
     }
     return result.data;
 }
