@@ -6,8 +6,17 @@ import { locationInFlandersSchema } from './types/api-schemas';
 import getAllVerifiedAddresses from './address-check';
 import { postalCodesQuerySchema, postalNamesQuerySchema, provinceQuerySchema, searchQuerySchema } from './types';
 import { getPostalCodes, getPostalNames, getProvinces, initializeStore } from './store';
+import cors, { CorsOptions } from 'cors';
+import { europeanCountries } from './types/constants';
+
+const corsOptions: CorsOptions   = {
+  origin: ['http://localhost:4200','http://localhost:9300'],
+  methods: ['GET'],
+  optionsSuccessStatus: 200,
+}
 
 initializeStore().then(()=>{
+  app.use(cors());
   app.get('/search', async ( req, res ) => {
     const query = searchQuerySchema.safeParse(req.query);
     if (!query.success) {
@@ -61,14 +70,16 @@ initializeStore().then(()=>{
     res.send(getProvinces(query.data.postalCode,query.data.postalName));
   });
 
+  app.get('/countries', async (_req,res)=>{
+    res.send(europeanCountries);
+  })
+
   console.log(`Server started. au-address-search can be used now.`)
 }).catch((err)=>{
   console.error('Failed to initialise store with error');
   console.error(err);
   process.exit(-1);
 });
-
-
 
 
 // app.get('/municipalities', async (req,res)=>{
