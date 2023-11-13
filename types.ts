@@ -69,7 +69,7 @@ class ApiError extends Error {
   readonly status: number;
   readonly zodError: ZodError | undefined;
   constructor(...args: ApiArgs) {
-    super(args[1],args[2])
+    super(args[1],args[2]);
     if (args[0] instanceof ZodError) {
       this.status = 200;
       this.zodError = args[0]

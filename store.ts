@@ -253,12 +253,9 @@ function getPostalCodes(postalName?: string, province?:Province):PostalCodeSugge
 
 function getProvinces(postalCode?: string, postalName?:string):Province[] {
     if (!postalNameStore) throw notInitializedError;
-    if (postalName) {
+    if (postalName && !postalCode) {
         const postalNameInfo = postalNameStore[postalName];
         if (!postalNameInfo) throw new ClientError(404,`Postalname ${postalName} not found.`);
-        if (postalCode && postalCodeToProvince(postalCode)!==postalNameInfo.province) {
-            throw new ClientError(400,`Impossible combination of postalcode and -name. Respectively ${postalCode} and ${postalName}`);
-        }
         return [postalNameInfo.province];
     }
     if (postalCode) return [postalCodeToProvince(postalCode)];

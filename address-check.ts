@@ -1,6 +1,8 @@
 import config from './config';
-import { Address, LocationInFlanders, addressMatchResultSchema } from './types';
-import postalCodeToProvince from './postcode-province';
+import { LocationInFlanders } from './fuzzy-search';
+import { postalCodeToProvince } from './postcode-province';
+import { Address } from './types';
+import { addressMatchResultSchema } from './types/api-schemas';
 import { encodeValuesURI } from './util/util';
 
 export default async function getAllVerifiedAddresses(
