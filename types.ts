@@ -55,13 +55,6 @@ class ServerError extends ClientError {
   }
 }
 
-/*
-    public readonly status: number,
-    public readonly schemaError?:ZodError,
-    message?:string, 
-    options?:ConstructorParameters<typeof Error>[1],
-*/
-
 type ApiArgs = 
   [ number | ZodError ,string, ConstructorParameters<typeof Error>[1]? ];
 

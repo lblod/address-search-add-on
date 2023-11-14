@@ -16,3 +16,10 @@ export function encodeValuesURI<T extends object>(input: T): T {
       { ...input }
     );
   }
+
+export function envStringToBoolean(input: string):boolean {
+  const check = input.toLowerCase().trim();
+  if (check === "" || check === "0" || check === "false") return false;
+  if (check === "1" || check === "true") return true;
+  throw new Error(`Bad value for boolean env var "${check}". Should be true, false, 0 or 1`);
+}

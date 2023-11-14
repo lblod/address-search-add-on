@@ -10,9 +10,12 @@ import {
 import { municipalityGetPostInfoResultSchema, postalCodeMoreInformationSchema } from "./types/api-schemas";
 import { z } from 'zod';
 import fs from 'node:fs/promises';
-import { postalCodeFromFlemishPostalName, postalCodeToProvince } from "./postcode-province";
+import { isValidFlamishPostalCodeAssociatedWithProvince, postalCodeToProvince } from "./postcode-province";
 import { ApiError, ClientError, PostalCodeSuggestion, PostalNameSuggestion } from "./types";
 import { Province, provinces } from "./types/constants";
+import { envStringToBoolean } from "./util/util";
+
+const DISABLE_CACHE = envStringToBoolean(process.env["DISABLE_CACHE"] ?? 'false')
 
 function delay(millis:number):Promise<void> {
     return new Promise((resolve)=>setTimeout(resolve,millis));
@@ -98,6 +101,7 @@ type PostalInformation = PostInfoResult['postInfoObjecten'][number];
 async function loadPostalInformation():Promise<PostalInformation[]> {
     // Try a file
     try {
+        if (DISABLE_CACHE) throw new Error('No cache allowed.');
         const postalInformation = await fs.readFile('/app/cache/postal-information.json',{encoding:'utf-8'});
         console.log('Got postal information from cache');
         return JSON.parse(postalInformation) as PostalInformation[];
@@ -105,7 +109,7 @@ async function loadPostalInformation():Promise<PostalInformation[]> {
         if (!(e instanceof Error)) throw e;
         const postalInformation: PostalInformation[] = [];
         for await (const batch of postalInformationGenerator()) {
-            postalInformation.push(...batch.postInfoObjecten.filter((info)=>postalCodeFromFlemishPostalName(info.identificator.objectId)))
+            postalInformation.push(...batch.postInfoObjecten.filter((info)=>isValidFlamishPostalCodeAssociatedWithProvince(info.identificator.objectId)))
         }
         // Save this result for next time
         await fs.writeFile('/app/cache/postal-information.json',JSON.stringify(postalInformation, undefined, 3),{encoding:'utf-8'});
@@ -116,6 +120,7 @@ async function loadPostalInformation():Promise<PostalInformation[]> {
 async function loadMunicipalityNames():Promise<string[]> {
     // Try a file
     try {
+        if (DISABLE_CACHE) throw new Error('No cache allowed.');
         const municipalities = await fs.readFile('/app/cache/municipalities.json',{encoding:'utf-8'});
         console.log('Got municipalities from cache');
         return JSON.parse(municipalities);
@@ -133,6 +138,7 @@ type PostDetail = z.infer<typeof postalCodeMoreInformationSchema>;
 async function loadPostCodeDetails(postcodes:Set<string>):Promise<Record<string,PostDetail>> {
     // Try a file
     const cachedDetails: Record<string,PostDetail> = await (async()=>{
+        if (DISABLE_CACHE) return {};
         try {
             const detailsText = await fs.readFile('/app/cache/post-details.json',{encoding:'utf-8'});
             return JSON.parse(detailsText) as Record<string,PostDetail>;
@@ -165,13 +171,14 @@ async function loadPostCodeDetails(postcodes:Set<string>):Promise<Record<string,
 }
 
 
-
+/**
+ * Query data from basisregisters or get it from the cache to build some data structures to query into.
+ * This function needs to be completed or the functions getPostalNames, getPostalCodes, getProvinces wil not work
+ */
 async function initializeStore() {
-    console.log('INITIALIZING STORE FROM BASISREGISTERS API');
+    console.log('INITIALIZING SERVICE BY GATHERING DATA FROM THE CACHE OR BASISREGISTERS API.');
     municipalityNames = new Set(await loadMunicipalityNames());
-    
-    console.log(`Got list of ${municipalityNames.size} unique municipality names which are in use.`);
-
+    console.log(`Got list of ${municipalityNames.size} unique municipality names from the basisregisters API`);
     const postalInformation = await loadPostalInformation();
 
     // Extract all unique postal codes and names
@@ -180,11 +187,12 @@ async function initializeStore() {
         acc.push(...current.postnamen.map((postNaam)=>capitalize(postNaam.geografischeNaam.spelling)));
         return acc;
     },[]))
+    console.log(`Got ${postalCodes.size} unique postal codes and ${postalNames.size} unique postal names from a collection of ${postalInformation.length} objects returned by the basisregisters API.`);
 
     // Get the postal details:
     const postalDetails = await loadPostCodeDetails(postalCodes);
 
-    console.log(`Got ${postalCodes.size} unique postal codes and ${postalNames.size} unique postal names from a collection of ${postalInformation.length} objects returned by the API.`);
+    console.log(`Queried the details of ${Object.keys(postalDetails).length} postal codes from the basisregisters API`)
 
     // Now we start building some data stores.
     postalNameStore = [...postalNames].reduce<Record<string,PostalNameSuggestion>>((acc,current)=>{
@@ -278,7 +286,7 @@ export type MunicipalityInformation = {
 
 export type PostalNameInformation = {
     postalName: string;
-    postalCode: string; // Province can be derived from this
+    postalCode: string;
     municipality: MunicipalityInformation;
 }
 

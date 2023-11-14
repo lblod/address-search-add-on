@@ -12,6 +12,7 @@ const locationResultSchema = z.object({
 });
 
 type LocationResult = z.infer<typeof locationResultSchema>;
+
 export type LocationInFlanders = {
     municipality: string;
     street: string;
@@ -20,6 +21,7 @@ export type LocationInFlanders = {
 }
 
 const validResponseSchema = z.array(locationResultSchema);
+
 async function getLocations(fuzzyQuery:string): Promise<LocationResult[]> {
     const response = await fetch(fuzzySearchUrl(fuzzyQuery));
     if (response.status !== 200) {
@@ -45,6 +47,11 @@ function locationResultToLocationInFlanders(location:LocationResult):LocationInF
     }
 }
 
+/**
+ * Queries the fuzzy address search API to search for locations in Flanders using a fuzzy search string
+ * @param fuzzyQuery The query in string format
+ * @returns An array of locations
+ */
 export default async function fuzzySearch(fuzzyQuery:string): Promise<LocationInFlanders[]> {
     const locations = await getLocations(fuzzyQuery);
     return locations.map(locationResultToLocationInFlanders);

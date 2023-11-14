@@ -5,6 +5,11 @@ import { Address } from './types';
 import { addressMatchResultSchema } from './types/api-schemas';
 import { encodeValuesURI } from './util/util';
 
+/**
+ * Query the basisregisters API to see which official adresses correspond to the data in the location.
+ * @param location The location we should use to check for registered addresses
+ * @returns A list of adresses
+ */
 export default async function getAllVerifiedAddresses(
   location: LocationInFlanders
 ): Promise<Address[]> {

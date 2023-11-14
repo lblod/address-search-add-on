@@ -16,7 +16,7 @@ const corsOptions: CorsOptions   = {
 }
 
 initializeStore().then(()=>{
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.get('/search', async ( req, res ) => {
     const query = searchQuerySchema.safeParse(req.query);
     if (!query.success) {
@@ -74,54 +74,9 @@ initializeStore().then(()=>{
     res.send(europeanCountries);
   })
 
-  console.log(`Server started. au-address-search can be used now.`)
+  console.log(`Server started. au-address-search component can be used now.`)
 }).catch((err)=>{
-  console.error('Failed to initialise store with error');
+  console.error('Failed to initialise store with error:');
   console.error(err);
   process.exit(-1);
 });
-
-
-// app.get('/municipalities', async (req,res)=>{
-//   const query = postalNamesQuerySchema.safeParse(req.query);
-//   if (!query.success) {
-//     res.status(400).send(prettyError(query.error));
-//     return;
-//   }
-//   try {
-//     res.send(await getPostalNameSuggestions(query.data.postalCode,query.data.province))
-//   } catch (e) {
-//     res.status(500).send(e);
-//   }
-// })
-
-// app.get('/all-municipalities', async (_req,res)=>{
-//   try {
-//     res.send(await getAllMunicipalitiesFromApi())
-//   } catch (e) {
-//     res.status(500).send(e);
-//   }
-// })
-
-// app.get('/postal-codes', async (req,res)=> {
-//   const query = postalCodesQuerySchema.safeParse(req.query);
-//   if (!query.success) {
-//     res.status(400).send(prettyError(query.error));
-//     return;
-//   }
-//   try {
-//     res.send(await getPostalCodeSuggestions(query.data.municipality,query.data.province))
-//   } catch (e) {
-//     res.status(500).send(e);
-//   }
-// })
-
-// app.get('/provinces', async (_req,res)=> {
-//     res.send(provinces);
-// })
-
-// app.get('/countries', async (_req,res)=>{
-//   res.send(europeanCountries);
-// })
-
-
