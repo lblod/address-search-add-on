@@ -17,6 +17,8 @@ import { envStringToBoolean } from "./util/util";
 
 const DISABLE_CACHE = envStringToBoolean(process.env["DISABLE_CACHE"] ?? 'false')
 
+const CACHE_LOCATION = process.env["CACHE_LOCATION"] ?? '/data/cache';
+
 function delay(millis:number):Promise<void> {
     return new Promise((resolve)=>setTimeout(resolve,millis));
 }
@@ -102,7 +104,7 @@ async function loadPostalInformation():Promise<PostalInformation[]> {
     // Try a file
     try {
         if (DISABLE_CACHE) throw new Error('No cache allowed.');
-        const postalInformation = await fs.readFile('/app/cache/postal-information.json',{encoding:'utf-8'});
+        const postalInformation = await fs.readFile(`${CACHE_LOCATION}/postal-information.json`,{encoding:'utf-8'});
         console.log('Got postal information from cache');
         return JSON.parse(postalInformation) as PostalInformation[];
     } catch (e) {
@@ -112,7 +114,7 @@ async function loadPostalInformation():Promise<PostalInformation[]> {
             postalInformation.push(...batch.postInfoObjecten.filter((info)=>isValidFlamishPostalCodeAssociatedWithProvince(info.identificator.objectId)))
         }
         // Save this result for next time
-        await fs.writeFile('/app/cache/postal-information.json',JSON.stringify(postalInformation, undefined, 3),{encoding:'utf-8'});
+        await fs.writeFile(`${CACHE_LOCATION}/postal-information.json`,JSON.stringify(postalInformation, undefined, 3),{encoding:'utf-8'});
         return postalInformation;
     }
 }
@@ -121,14 +123,14 @@ async function loadMunicipalityNames():Promise<string[]> {
     // Try a file
     try {
         if (DISABLE_CACHE) throw new Error('No cache allowed.');
-        const municipalities = await fs.readFile('/app/cache/municipalities.json',{encoding:'utf-8'});
+        const municipalities = await fs.readFile(`${CACHE_LOCATION}/municipalities.json`,{encoding:'utf-8'});
         console.log('Got municipalities from cache');
         return JSON.parse(municipalities);
     } catch (e) {
         if (!(e instanceof Error)) throw e;
         const municipalities = await getAllMunicipalitiesFromApi(); // Populate list of 300 names
         // Save this result for next time
-        await fs.writeFile('/app/cache/municipalities.json',JSON.stringify(municipalities, undefined, 3),{encoding:'utf-8'});
+        await fs.writeFile(`${CACHE_LOCATION}/municipalities.json`,JSON.stringify(municipalities, undefined, 3),{encoding:'utf-8'});
         return municipalities;
     }
 }
@@ -140,7 +142,7 @@ async function loadPostCodeDetails(postcodes:Set<string>):Promise<Record<string,
     const cachedDetails: Record<string,PostDetail> = await (async()=>{
         if (DISABLE_CACHE) return {};
         try {
-            const detailsText = await fs.readFile('/app/cache/post-details.json',{encoding:'utf-8'});
+            const detailsText = await fs.readFile(`${CACHE_LOCATION}/post-details.json`,{encoding:'utf-8'});
             return JSON.parse(detailsText) as Record<string,PostDetail>;
         } catch (e) {
             if (!(e instanceof Error)) throw e;
@@ -164,7 +166,7 @@ async function loadPostCodeDetails(postcodes:Set<string>):Promise<Record<string,
         }
         // We may have found some additional codes before it errored out.
         // Save this result for next time
-        await fs.writeFile('/app/cache/post-details.json',JSON.stringify(cachedDetails, undefined, 3),{encoding:'utf-8'});
+        await fs.writeFile(`${CACHE_LOCATION}/post-details.json`,JSON.stringify(cachedDetails, undefined, 3),{encoding:'utf-8'});
     }
 
     return cachedDetails;
@@ -186,7 +188,7 @@ async function initializeStore() {
     postalNames = new Set(postalInformation.reduce<string[]>((acc,current)=>{
         acc.push(...current.postnamen.map((postNaam)=>capitalize(postNaam.geografischeNaam.spelling)));
         return acc;
-    },[]))
+    },[]));
     console.log(`Got ${postalCodes.size} unique postal codes and ${postalNames.size} unique postal names from a collection of ${postalInformation.length} objects returned by the basisregisters API.`);
 
     // Get the postal details:
@@ -255,7 +257,6 @@ function getPostalCodes(postalName?: string, province?:Province):PostalCodeSugge
     if (province) {
         result = result.filter((suggestion)=>suggestion.province===province);
     }
-
     return result;
 }
 

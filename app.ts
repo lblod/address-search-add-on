@@ -26,6 +26,7 @@ initializeStore().then(()=>{
     try {
       res.send(await fuzzySearch(query.data.query));
     } catch (e) {
+      console.log(`Error when querying fuzzy search:\n${e}`);
       res.status(500).send(e);
     }
   });
@@ -39,6 +40,7 @@ initializeStore().then(()=>{
     try {
       res.send(await getAllVerifiedAddresses(query.data));
     } catch (e) {
+      console.log(`Error when querying basisregisters to verify address:\n${e}`);
       res.status(500).send(e);
     }
   });
@@ -49,7 +51,12 @@ initializeStore().then(()=>{
       res.status(400).send(`Client error: illegal query parameters. Parsing result:\n${prettyError(query.error)}`);
       return;
     }
-    res.send(getPostalNames(query.data.postalCode, query.data.province));
+    try {
+      res.send(getPostalNames(query.data.postalCode, query.data.province));
+    } catch (e) {
+      console.log(`Error when filtering postal names:\n${e}`);
+      res.status(500).send(e);
+    }
   });
 
   app.get('/postal-codes', async (req,res)=>{ 
@@ -58,7 +65,12 @@ initializeStore().then(()=>{
       res.status(400).send(`Client error: illegal query parameters. Parsing result:\n${prettyError(query.error)}`);
       return;
     }
-    res.send(getPostalCodes(query.data.postalName,query.data.province));
+    try {
+      res.send(getPostalCodes(query.data.postalName,query.data.province));
+    } catch (e) {
+      console.log(`Error when filtering postal codes:\n${e}`);
+      res.status(500).send(e);
+    }
   });
 
   app.get('/provinces', async (req,res)=>{
@@ -67,7 +79,12 @@ initializeStore().then(()=>{
       res.status(400).send(`Client error: illegal query parameters. Parsing result:\n${prettyError(query.error)}`);
       return;
     }
-    res.send(getProvinces(query.data.postalCode,query.data.postalName));
+    try {
+      res.send(getProvinces(query.data.postalCode,query.data.postalName));
+    } catch (e) {
+      console.log(`Error when filtering provinces:\n${e}`);
+      res.status(500).send(e);
+    }
   });
 
   app.get('/countries', async (_req,res)=>{

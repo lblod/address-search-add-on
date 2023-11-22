@@ -1,7 +1,7 @@
 import config from './config';
 import { LocationInFlanders } from './fuzzy-search';
 import { postalCodeToProvince } from './postcode-province';
-import { Address } from './types';
+import { Address, ApiError } from './types';
 import { addressMatchResultSchema } from './types/api-schemas';
 import { encodeValuesURI } from './util/util';
 
@@ -13,10 +13,15 @@ import { encodeValuesURI } from './util/util';
 export default async function getAllVerifiedAddresses(
   location: LocationInFlanders
 ): Promise<Address[]> {
-  console.log(`Request:${getAllAddressesSearchUrl(location)}`);
   const response = await fetch(getAllAddressesSearchUrl(location));
-  const jsonLdBody = addressMatchResultSchema.parse(await response.json());
-  const addresses = jsonLdBody.adresMatches.map<Address>((match)=>{
+  if (response.status !== 200) {
+    throw new ApiError(response.status,await response.text());
+  }
+  const jsonLdBody = addressMatchResultSchema.safeParse(await response.json());
+  if (!jsonLdBody.success) {
+    throw new ApiError(jsonLdBody.error,'Fuzzy search repsone parsing failed');
+  }
+  const addresses = jsonLdBody.data.adresMatches.map<Address>((match)=>{
     return {
       country: 'België',
       province: postalCodeToProvince(match.postinfo.objectId),

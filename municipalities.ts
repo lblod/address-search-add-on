@@ -1,5 +1,3 @@
-// When starting the server we will query all municipalities and cache them
-
 import config from "./config";
 import { municipalitySearchResultSchema } from "./types/api-schemas";
 import { ApiError } from "./types";

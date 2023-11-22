@@ -1,13 +1,14 @@
 import { ZodError, z } from 'zod';
 import { postalCodeSchema } from './types/api-schemas';
-import { Province, provinces } from './types/constants';
+import { Country, Province, provinces } from './types/constants';
+import prettyError from './util/errors';
 
 /**
  * Address data structure which contains all the information associated with a correctly formatted address.
  */
 export type Address = {
-    country: string;
-    province: string;
+    country: Country;
+    province: Province;
     municipality: string;
     postalCode: string;
     street: string;
@@ -70,6 +71,10 @@ class ApiError extends Error {
       this.status = args[0];
       this.zodError = undefined;
     }
+  }
+
+  override toString():string {
+    return `API Error: Status ${this.status}\n${this.zodError?`\nParsing error:${prettyError(this.zodError)}\n`:''}${super.toString()}`
   }
 }
 

@@ -1,6 +1,5 @@
 import { Province } from "./types/constants";
 
-
 const postalCodeRegex = /^[0-9]{4}$/;
 
 /**
